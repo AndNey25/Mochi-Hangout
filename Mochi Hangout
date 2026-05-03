@@ -1,0 +1,83 @@
+-- ANDNEY PROJECT v13.0 | OMNI-GOD SPEED EDITION
+local player = game.Players.LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
+local fishing = rs.FishingSystem
+local inventory = fishing.InventoryEvents
+
+-- UI LITE
+local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
+local ToggleBtn = Instance.new("TextButton", ScreenGui)
+
+ToggleBtn.Size = UDim2.new(0, 160, 0, 50)
+ToggleBtn.Position = UDim2.new(0.5, -80, 0.15, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 200)
+ToggleBtn.Text = "OMNI FISH: OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.TextSize = 18
+ToggleBtn.Draggable = true
+
+_G.AutoFish = false
+
+-- 1. SILENT ANTI-AFK
+task.spawn(function()
+    while true do
+        pcall(function() rs.AFKSystem.AFKEvent:FireServer(false) end)
+        task.wait(10)
+    end
+end)
+
+-- 2. AUTO SELL LOGIC (Tiap 30 detik jual semua biar tas ga penuh)
+task.spawn(function()
+    while true do
+        if _G.AutoFish then
+            pcall(function()
+                inventory.Inventory_SellAll:InvokeServer()
+                print("Auto-Sell: All fish sold!")
+            end)
+        end
+        task.wait(30)
+    end
+end)
+
+-- 3. GOD-SPEED MULTI-FISH LOGIC
+local function startFishing()
+    task.spawn(function()
+        while _G.AutoFish do
+            pcall(function()
+                local char = player.Character
+                if not char then return end
+                local hrp = char.HumanoidRootPart
+                local pos = hrp.Position
+                local castPos = pos + hrp.CFrame.LookVector * 3 -- Super deket biar kilat
+
+                -- STEP A: Instant Equip & Cast
+                inventory.Inventory_EquipRod:FireServer("Basic Rod")
+                fishing.CastReplication:FireServer(pos, castPos, "Basic Rod", 99)
+                
+                -- STEP B: Ultra-Thin Delay (Adjust if fish don't enter bag)
+                task.wait(0.08) 
+                
+                -- STEP C: Double Giver (Naga & El Maja)
+                fishing.FishGiver:FireServer({
+                    hookPosition = castPos,
+                    name = "Naga", 
+                    rarity = "Secret",
+                    weight = math.random(800,1000)
+                })
+                
+                fishing.FishGiver:FireServer({
+                    hookPosition = castPos,
+                    name = "El Maja", 
+                    rarity = "Secret",
+                    weight = math.random(800, 1000)
+                })
+
+                -- STEP D: Instant Reset
+                fishing.CleanupCast:FireServer()
+                
+                task.wait(0.05)
+            end)
+        end
+    end)
+end
