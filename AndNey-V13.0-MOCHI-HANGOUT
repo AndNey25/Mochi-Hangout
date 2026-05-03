@@ -62,15 +62,15 @@ local function startFishing()
                 fishing.FishGiver:FireServer({
                     hookPosition = castPos,
                     name = "Naga", 
-                    rarity = "Secret",
-                    weight = math.random(800,1000)
+                    rarity = "Legendary",
+                    weight = math.random(950, 1000)
                 })
                 
                 fishing.FishGiver:FireServer({
                     hookPosition = castPos,
                     name = "El Maja", 
-                    rarity = "Secret",
-                    weight = math.random(800, 1000)
+                    rarity = "Epic",
+                    weight = math.random(850, 1000)
                 })
 
                 -- STEP D: Instant Reset
@@ -81,3 +81,16 @@ local function startFishing()
         end
     end)
 end
+
+-- 4. TOGGLE
+ToggleBtn.MouseButton1Click:Connect(function()
+    _G.AutoFish = not _G.AutoFish
+    if _G.AutoFish then
+        ToggleBtn.Text = "OMNI FISH: ON"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        startFishing()
+    else
+        ToggleBtn.Text = "OMNI FISH: OFF"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 200)
+    end
+end)
