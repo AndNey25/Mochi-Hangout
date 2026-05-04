@@ -52,8 +52,8 @@ local function startFishing()
                 local castPos = pos + hrp.CFrame.LookVector * 3 -- Super deket biar kilat
 
                 -- STEP A: Instant Equip & Cast
-                inventory.Inventory_EquipRod:FireServer("Basic Rod")
-                fishing.CastReplication:FireServer(pos, castPos, "Basic Rod", 99)
+                inventory.Inventory_EquipRod:FireServer("BlackStar")
+                fishing.CastReplication:FireServer(pos, castPos, "BlackStar", 99)
                 
                 -- STEP B: Ultra-Thin Delay (Adjust if fish don't enter bag)
                 task.wait(0.08) 
@@ -62,14 +62,14 @@ local function startFishing()
                 fishing.FishGiver:FireServer({
                     hookPosition = castPos,
                     name = "Naga", 
-                    rarity = "Legendary",
+                    rarity = "Secret",
                     weight = math.random(950, 1000)
                 })
                 
                 fishing.FishGiver:FireServer({
                     hookPosition = castPos,
                     name = "El Maja", 
-                    rarity = "Epic",
+                    rarity = "Secret",
                     weight = math.random(850, 1000)
                 })
 
