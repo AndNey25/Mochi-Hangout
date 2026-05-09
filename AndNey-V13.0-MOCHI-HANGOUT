@@ -1,8 +1,9 @@
--- ANDNEY PROJECT v13.0 | OMNI-GOD SPEED EDITION
+-- ANDNEY PROJECT v13.0 | NORMALIZED SECRET EDITION
 local player = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
-local fishing = rs.FishingSystem
-local inventory = fishing.InventoryEvents
+local fishing = rs:WaitForChild("FishingSystem")
+local events = fishing:WaitForChild("FishingSystemEvents")
+local inventory = fishing:WaitForChild("InventoryEvents")
 
 -- UI LITE
 local ScreenGui = Instance.new("ScreenGui", player.PlayerGui)
@@ -11,7 +12,7 @@ local ToggleBtn = Instance.new("TextButton", ScreenGui)
 ToggleBtn.Size = UDim2.new(0, 160, 0, 50)
 ToggleBtn.Position = UDim2.new(0.5, -80, 0.15, 0)
 ToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 200)
-ToggleBtn.Text = "OMNI FISH: OFF"
+ToggleBtn.Text = "AUTO FISH: OFF"
 ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ToggleBtn.Font = Enum.Font.SourceSansBold
 ToggleBtn.TextSize = 18
@@ -27,57 +28,70 @@ task.spawn(function()
     end
 end)
 
--- 2. AUTO SELL LOGIC (Tiap 30 detik jual semua biar tas ga penuh)
+-- 2. AUTO SELL
 task.spawn(function()
     while true do
         if _G.AutoFish then
-            pcall(function()
-                inventory.Inventory_SellAll:InvokeServer()
-                print("Auto-Sell: All fish sold!")
-            end)
+            pcall(function() inventory.Inventory_SellAll:InvokeServer() end)
         end
-        task.wait(30)
+        task.wait(60) -- Jeda jual lebih lama biar aman
     end
 end)
 
--- 3. GOD-SPEED MULTI-FISH LOGIC
+-- DATA IKAN (DIPILIH SATU PER TARIKAN)
+local SecretFish = {
+    {name = "Naga Kaisar", weight = {1111, 1200}},
+    {name = "Ancient Shark", weight = {6640, 7000}},
+    {name = "Megalodon", weight = {6402, 6500}},
+    {name = "Acid Stingray", weight = {6742, 6800}},
+    {name = "Duyung Macho", weight = {3903, 4000}},
+    {name = "Tuna Magma", weight = {3085, 4902}},
+    {name = "Nyonya Naga", weight = {3037, 3100}},
+    {name = "Raksasa Hantu", weight = {2871, 3697}},
+    {name = "Bloopnya", weight = {2036, 2629}},
+    {name = "El Maja", weight = {965, 2535}},
+    {name = "Ikan Paus Hitam", weight = {1311, 1400}},
+    {name = "Ikan Hiu Zombie", weight = {1600, 1700}},
+    {name = "Penyu Unyu", weight = {1137, 1144}},
+    {name = "Blue Dragon", weight = {726, 800}},
+    {name = "Buaya Hutan", weight = {795, 850}}
+}
+
+-- 3. NORMALIZED LOGIC
 local function startFishing()
     task.spawn(function()
         while _G.AutoFish do
             pcall(function()
                 local char = player.Character
-                if not char then return end
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                
                 local hrp = char.HumanoidRootPart
                 local pos = hrp.Position
-                local castPos = pos + hrp.CFrame.LookVector * 3 -- Super deket biar kilat
+                local castPos = pos + hrp.CFrame.LookVector * 5 -- Jarak normal
 
-                -- STEP A: Instant Equip & Cast
+                -- A: EQUIP & CAST
                 inventory.Inventory_EquipRod:FireServer("BlackStar")
-                fishing.CastReplication:FireServer(pos, castPos, "BlackStar", 99)
+                fishing.CastReplication:FireServer(pos, castPos, "BlackStar", 95)
                 
-                -- STEP B: Ultra-Thin Delay (Adjust if fish don't enter bag)
-                task.wait(0.08) 
+                -- B: TUNGGU IKAN MENGGIGIT (Biar kelihatan normal)
+                task.wait(math.random(2, 4)) 
+                events.ReplicateExclaim:FireServer("Common")
                 
-                -- STEP C: Double Giver (Naga & El Maja)
-                fishing.FishGiver:FireServer({
+                -- C: TARIK 1 IKAN ACAK
+                local target = SecretFish[math.random(1, #SecretFish)]
+                events.FishGiver:FireServer({
                     hookPosition = castPos,
-                    name = "Naga", 
-                    rarity = "Secret",
-                    weight = math.random(950, 1000)
+                    name = target.name,
+                    rarity = "Rahasia",
+                    weight = math.random(target.weight[1], target.weight[2])
                 })
-                
-                fishing.FishGiver:FireServer({
-                    hookPosition = castPos,
-                    name = "El Maja", 
-                    rarity = "Secret",
-                    weight = math.random(850, 1000)
-                })
+                print("DARKAI: Berhasil dapet " .. target.name)
 
-                -- STEP D: Instant Reset
+                -- D: RESET
                 fishing.CleanupCast:FireServer()
-                
-                task.wait(0.05)
+                task.wait(1.5) -- Jeda sebelum lemparan berikutnya
             end)
+            task.wait(0.5)
         end
     end)
 end
@@ -85,12 +99,7 @@ end
 -- 4. TOGGLE
 ToggleBtn.MouseButton1Click:Connect(function()
     _G.AutoFish = not _G.AutoFish
-    if _G.AutoFish then
-        ToggleBtn.Text = "OMNI FISH: ON"
-        ToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-        startFishing()
-    else
-        ToggleBtn.Text = "OMNI FISH: OFF"
-        ToggleBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 200)
-    end
+    ToggleBtn.Text = _G.AutoFish and "AUTO FISH: ON" or "AUTO FISH: OFF"
+    ToggleBtn.BackgroundColor3 = _G.AutoFish and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(150, 0, 200)
+    if _G.AutoFish then startFishing() end
 end)
